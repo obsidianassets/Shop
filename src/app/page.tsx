@@ -63,6 +63,9 @@ export default async function Home({
           <p>
             <a href="/topup">Add funds with USDT</a>
           </p>
+          <p>
+            <a href="/admin/stock">Admin stock</a>
+          </p>
           <UserButton />
         </>
       )}
