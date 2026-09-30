@@ -66,6 +66,9 @@ export default async function Home({
           <p>
             <a href="/admin/stock">Admin stock</a>
           </p>
+          <p>
+            <a href="/orders">Your keys</a>
+          </p>
           <UserButton />
         </>
       )}

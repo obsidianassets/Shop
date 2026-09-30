@@ -57,6 +57,33 @@ export async function confirmTopUp(formData: FormData) {
   revalidatePath("/");
 }
 
+export async function addKeys(formData: FormData) {
+  const user = await currentUser();
+  if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
+    return { error: "Not admin." };
+  }
+
+  const raw = String(formData.get("keys") || "");
+  const keys = raw
+    .split("\n")
+    .map((k) => k.trim())
+    .filter(Boolean);
+
+  const product = await prisma.product.upsert({
+    where: { slug: "test-key" },
+    update: {},
+    create: { slug: "test-key", name: "Test Key", priceCents: 100 },
+  });
+
+  for (const payload of keys) {
+    await prisma.stockItem.create({
+      data: { productId: product.id, payload, status: "available" },
+    });
+  }
+
+  revalidatePath("/admin/stock");
+}
+
 export async function buyTestKey() {
   const { userId } = await auth();
   if (!userId) redirect("/?err=signin");
@@ -94,7 +121,7 @@ export async function buyTestKey() {
   await prisma.$transaction([
     prisma.stockItem.update({
       where: { id: item.id },
-      data: { status: "sold" },
+      data: { status: "sold", soldTo: userId },
     }),
     prisma.ledger.create({
       data: {
@@ -106,31 +133,4 @@ export async function buyTestKey() {
   ]);
 
   redirect("/?key=" + item.payload);
-}
-
-export async function addKeys(formData: FormData) {
-  const user = await currentUser();
-  if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
-    return { error: "Not admin." };
-  }
-
-  const raw = String(formData.get("keys") || "");
-  const keys = raw
-    .split("\n")
-    .map((k) => k.trim())
-    .filter(Boolean);
-
-  const product = await prisma.product.upsert({
-    where: { slug: "test-key" },
-    update: {},
-    create: { slug: "test-key", name: "Test Key", priceCents: 100 },
-  });
-
-  for (const payload of keys) {
-    await prisma.stockItem.create({
-      data: { productId: product.id, payload, status: "available" },
-    });
-  }
-
-  revalidatePath("/admin/stock");
 }
