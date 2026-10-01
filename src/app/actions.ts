@@ -7,13 +7,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function submitTopUp(formData: FormData) {
   const { userId } = await auth();
-  if (!userId) return { error: "Sign in first." };
+  if (!userId) redirect("/topup?err=signin");
 
   const txHash = String(formData.get("txHash") || "").trim();
   const amount = Number(formData.get("amount"));
-  if (!txHash || !amount || amount <= 0) {
-    return { error: "Hash and amount required." };
-  }
+  if (!txHash || !amount || amount <= 0) redirect("/topup?err=fields");
 
   try {
     await prisma.topUp.create({
@@ -25,22 +23,22 @@ export async function submitTopUp(formData: FormData) {
       },
     });
   } catch {
-    return { error: "That hash was already submitted." };
+    redirect("/topup?err=used");
   }
 
   revalidatePath("/topup");
-  return { ok: true };
+  redirect("/topup?ok=1");
 }
 
 export async function confirmTopUp(formData: FormData) {
   const user = await currentUser();
   if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
-    return { error: "Not admin." };
+    redirect("/topup?err=admin");
   }
 
   const id = String(formData.get("id") || "");
   const topUp = await prisma.topUp.findUnique({ where: { id } });
-  if (!topUp || topUp.status !== "pending") return { error: "Invalid." };
+  if (!topUp || topUp.status !== "pending") redirect("/topup?err=invalid");
 
   await prisma.$transaction([
     prisma.topUp.update({ where: { id }, data: { status: "paid" } }),
@@ -55,12 +53,13 @@ export async function confirmTopUp(formData: FormData) {
 
   revalidatePath("/topup");
   revalidatePath("/");
+  redirect("/topup?ok=confirmed");
 }
 
 export async function createProduct(formData: FormData) {
   const user = await currentUser();
   if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
-    return { error: "Not admin." };
+    redirect("/admin/stock?err=admin");
   }
 
   const name = String(formData.get("name") || "").trim();
@@ -69,7 +68,7 @@ export async function createProduct(formData: FormData) {
     .toLowerCase()
     .replace(/\s+/g, "-");
   const price = Number(formData.get("price"));
-  if (!name || !slug || !price || price <= 0) return { error: "Fill all fields." };
+  if (!name || !slug || !price || price <= 0) redirect("/admin/stock?err=fields");
 
   await prisma.product.create({
     data: { name, slug, priceCents: Math.round(price * 100) },
@@ -77,12 +76,13 @@ export async function createProduct(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/stock");
+  redirect("/admin/stock?ok=1");
 }
 
 export async function addKeys(formData: FormData) {
   const user = await currentUser();
   if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
-    return { error: "Not admin." };
+    redirect("/admin/stock?err=admin");
   }
 
   const raw = String(formData.get("keys") || "");
@@ -93,7 +93,7 @@ export async function addKeys(formData: FormData) {
 
   const slug = String(formData.get("slug") || "test-key");
   const product = await prisma.product.findUnique({ where: { slug } });
-  if (!product) return { error: "Product not found." };
+  if (!product) redirect("/admin/stock?err=product");
 
   for (const payload of keys) {
     await prisma.stockItem.create({
@@ -102,6 +102,7 @@ export async function addKeys(formData: FormData) {
   }
 
   revalidatePath("/admin/stock");
+  redirect("/admin/stock?ok=keys");
 }
 
 export async function buyProduct(formData: FormData) {
@@ -142,10 +143,4 @@ export async function buyProduct(formData: FormData) {
   ]);
 
   redirect("/?key=" + item.payload);
-}
-
-export async function buyTestKey() {
-  const formData = new FormData();
-  formData.set("slug", "test-key");
-  return buyProduct(formData);
 }
