@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function OrdersPage() {
   const { userId } = await auth();
   if (!userId) return <main style={{ padding: 48 }}>Sign in first.</main>;

@@ -2,6 +2,8 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { confirmTopUp, submitTopUp } from "../actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function TopUpPage() {
   const { userId } = await auth();
   const user = await currentUser();

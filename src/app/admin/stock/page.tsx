@@ -2,6 +2,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { addKeys, createProduct } from "../../actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function StockPage() {
   const user = await currentUser();
   const isAdmin =
