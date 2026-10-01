@@ -57,6 +57,28 @@ export async function confirmTopUp(formData: FormData) {
   revalidatePath("/");
 }
 
+export async function createProduct(formData: FormData) {
+  const user = await currentUser();
+  if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
+    return { error: "Not admin." };
+  }
+
+  const name = String(formData.get("name") || "").trim();
+  const slug = String(formData.get("slug") || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+  const price = Number(formData.get("price"));
+  if (!name || !slug || !price || price <= 0) return { error: "Fill all fields." };
+
+  await prisma.product.create({
+    data: { name, slug, priceCents: Math.round(price * 100) },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin/stock");
+}
+
 export async function addKeys(formData: FormData) {
   const user = await currentUser();
   if (user?.emailAddresses[0]?.emailAddress !== process.env.ADMIN_EMAIL) {
@@ -69,11 +91,9 @@ export async function addKeys(formData: FormData) {
     .map((k) => k.trim())
     .filter(Boolean);
 
-  const product = await prisma.product.upsert({
-    where: { slug: "test-key" },
-    update: {},
-    create: { slug: "test-key", name: "Test Key", priceCents: 100 },
-  });
+  const slug = String(formData.get("slug") || "test-key");
+  const product = await prisma.product.findUnique({ where: { slug } });
+  if (!product) return { error: "Product not found." };
 
   for (const payload of keys) {
     await prisma.stockItem.create({
@@ -84,15 +104,13 @@ export async function addKeys(formData: FormData) {
   revalidatePath("/admin/stock");
 }
 
-export async function buyTestKey() {
+export async function buyProduct(formData: FormData) {
   const { userId } = await auth();
   if (!userId) redirect("/?err=signin");
 
-  const product = await prisma.product.upsert({
-    where: { slug: "test-key" },
-    update: {},
-    create: { slug: "test-key", name: "Test Key", priceCents: 100 },
-  });
+  const slug = String(formData.get("slug") || "test-key");
+  const product = await prisma.product.findUnique({ where: { slug } });
+  if (!product) redirect("/?err=stock");
 
   const balance =
     (
@@ -104,19 +122,10 @@ export async function buyTestKey() {
 
   if (balance < product.priceCents) redirect("/?err=balance");
 
-  let item = await prisma.stockItem.findFirst({
+  const item = await prisma.stockItem.findFirst({
     where: { productId: product.id, status: "available" },
   });
-
-  if (!item) {
-    item = await prisma.stockItem.create({
-      data: {
-        productId: product.id,
-        payload: "TEST-KEY-" + Date.now(),
-        status: "available",
-      },
-    });
-  }
+  if (!item) redirect("/?err=stock");
 
   await prisma.$transaction([
     prisma.stockItem.update({
@@ -133,4 +142,10 @@ export async function buyTestKey() {
   ]);
 
   redirect("/?key=" + item.payload);
+}
+
+export async function buyTestKey() {
+  const formData = new FormData();
+  formData.set("slug", "test-key");
+  return buyProduct(formData);
 }

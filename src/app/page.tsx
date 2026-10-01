@@ -1,7 +1,7 @@
 import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { buyTestKey } from "./actions";
+import { buyProduct } from "./actions";
 
 export default async function Home({
   searchParams,
@@ -10,17 +10,16 @@ export default async function Home({
 }) {
   const q = await searchParams;
   const { userId } = await auth();
+  const user = userId ? await currentUser() : null;
+  const email = user?.emailAddresses[0]?.emailAddress ?? "";
+  const isAdmin = email === process.env.ADMIN_EMAIL;
   let balanceCents = 0;
 
   if (userId) {
-    const user = await currentUser();
-    const email =
-      user?.emailAddresses[0]?.emailAddress ?? `${userId}@shop.local`;
-
     await prisma.user.upsert({
       where: { id: userId },
-      update: { email },
-      create: { id: userId, email },
+      update: { email: email || `${userId}@shop.local` },
+      create: { id: userId, email: email || `${userId}@shop.local` },
     });
 
     const sum = await prisma.ledger.aggregate({
@@ -29,6 +28,16 @@ export default async function Home({
     });
     balanceCents = sum._sum.amountCents ?? 0;
   }
+
+  const products = await prisma.product.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      stock: {
+        where: { status: "available" },
+        select: { id: true },
+      },
+    },
+  });
 
   return (
     <main style={{ padding: 48, fontFamily: "sans-serif" }}>
@@ -41,12 +50,6 @@ export default async function Home({
         <p>
           Your key: <b>{q.key}</b>
         </p>
-      )}
-
-      {userId && (
-        <form action={buyTestKey}>
-          <button type="submit">Buy Test Key — $1</button>
-        </form>
       )}
 
       {!userId ? (
@@ -63,15 +66,37 @@ export default async function Home({
           <p>
             <a href="/topup">Add funds with USDT</a>
           </p>
-          <p>
-            <a href="/admin/stock">Admin stock</a>
-          </p>
+          {isAdmin && (
+            <p>
+              <a href="/admin/stock">Admin stock</a>
+            </p>
+          )}
           <p>
             <a href="/orders">Your keys</a>
           </p>
           <UserButton />
         </>
       )}
+
+      <h2>Products</h2>
+      {products.length === 0 && <p>No products yet.</p>}
+      {products.map((product) => (
+        <div key={product.id} style={{ margin: "16px 0" }}>
+          <p>
+            <b>{product.name}</b> — $
+            {(product.priceCents / 100).toFixed(2)} — {product.stock.length} in
+            stock
+          </p>
+          {userId ? (
+            <form action={buyProduct}>
+              <input type="hidden" name="slug" value={product.slug} />
+              <button type="submit">Buy</button>
+            </form>
+          ) : (
+            <p>Sign in to buy.</p>
+          )}
+        </div>
+      ))}
     </main>
   );
 }
