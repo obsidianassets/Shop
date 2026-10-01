@@ -44,6 +44,9 @@ export default async function Home({
   return (
     <main style={{ padding: 48, fontFamily: "sans-serif" }}>
       <h1>Shop</h1>
+      <p>
+        <a href="/playbook/">Modules</a>
+      </p>
 
       {q.err === "balance" && <p>Not enough balance.</p>}
       {q.err === "stock" && <p>Out of stock.</p>}
