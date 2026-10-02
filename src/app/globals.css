@@ -221,6 +221,20 @@ body:has(.shop-home) {
   color: #ffffff;
 }
 
+.shop-home a.shop-hero-modules {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: #e3a94a;
+  color: #1b1206;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .shop-hero-secondary {
   border: 1px solid #3a4254;
   background: transparent;
@@ -249,6 +263,7 @@ body:has(.shop-home) {
   justify-content: center;
   gap: 10px;
   margin: 0 0 14px;
+  color: #8b93a8;
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;

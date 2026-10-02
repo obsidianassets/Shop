@@ -84,15 +84,16 @@ export default async function Home({
                 </button>
               </SignUpButton>
             )}
+            <a className="shop-hero-modules" href="/playbook/">
+              Modules
+            </a>
           </div>
         </div>
       </section>
       <div className="shop-wrap">
         <div className="shop-marquee">
           <p className="shop-marquee-label">
-            <span className="shop-marquee-blue">Placeholder</span>
-            <span className="shop-marquee-dot" />
-            <span className="shop-marquee-gray">Placeholder</span>
+            Sign in, add funds, and buy assets.
           </p>
           <div className="shop-marquee-viewport">
             <div className="shop-marquee-track">
@@ -108,14 +109,7 @@ export default async function Home({
             </div>
           </div>
         </div>
-        <p className="shop-kicker">Shop</p>
         <h1>Shop</h1>
-        <p className="shop-sub">Sign in, add funds, and buy a key.</p>
-        <p className="shop-modules">
-          <a className="shop-btn" href="/playbook/">
-            Modules
-          </a>
-        </p>
 
         <div className="shop-strip">
           <div className="shop-strip-item">
