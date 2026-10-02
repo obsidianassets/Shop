@@ -56,6 +56,23 @@ export default async function Home({
         <img src="/shop-banner.png" alt="" />
         <div className="shop-banner-fade" />
       </div>
+      <section className="shop-hero">
+        <div className="shop-hero-inner">
+          <p className="shop-hero-title">
+            Simple to buy. Fast to deliver. Built to scale.
+          </p>
+          <div className="shop-hero-actions">
+            <a className="shop-hero-primary" href="#products">
+              Browse the shop
+            </a>
+            <SignUpButton>
+              <button type="button" className="shop-hero-secondary">
+                Create account
+              </button>
+            </SignUpButton>
+          </div>
+        </div>
+      </section>
       <div className="shop-wrap">
         <div className="shop-marquee">
           <p className="shop-marquee-label">
@@ -156,7 +173,7 @@ export default async function Home({
           </div>
         )}
 
-        <h2>Products</h2>
+        <h2 id="products">Products</h2>
         {products.length === 0 && <p className="shop-muted">No products yet.</p>}
         <div className="shop-products">
           {products.map((product) => (
