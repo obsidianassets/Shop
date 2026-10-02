@@ -45,7 +45,19 @@ export default async function Home({
     <main style={{ padding: 48, fontFamily: "sans-serif" }}>
       <h1>Shop</h1>
       <p>
-        <a href="/playbook/">Modules</a>
+        <a
+          href="/playbook/"
+          style={{
+            background: "#121826",
+            color: "#F4F6FA",
+            textDecoration: "none",
+            padding: "12px 18px",
+            borderRadius: "4px",
+            fontWeight: 700,
+          }}
+        >
+          Modules
+        </a>
       </p>
 
       {q.err === "balance" && <p>Not enough balance.</p>}
