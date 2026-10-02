@@ -55,6 +55,14 @@ export default async function Home({
           <a className="shop-btn" href="/playbook/">
             Modules
           </a>
+          <a
+            className="shop-btn"
+            href="https://discord.gg/RwWRrpu3Z"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Discord
+          </a>
         </p>
 
         {q.err === "balance" && <p className="shop-note">Not enough balance.</p>}
