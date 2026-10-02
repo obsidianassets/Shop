@@ -42,78 +42,76 @@ export default async function Home({
   });
 
   return (
-    <main style={{ padding: 48, fontFamily: "sans-serif" }}>
-      <h1>Shop</h1>
-      <p>
-        <a
-          href="/playbook/"
-          style={{
-            background: "#121826",
-            color: "#F4F6FA",
-            textDecoration: "none",
-            padding: "12px 18px",
-            borderRadius: "4px",
-            fontWeight: 700,
-          }}
-        >
-          Modules
-        </a>
-      </p>
-
-      {q.err === "balance" && <p>Not enough balance.</p>}
-      {q.err === "stock" && <p>Out of stock.</p>}
-      {q.err === "signin" && <p>Sign in first.</p>}
-      {q.key && (
-        <p>
-          Your key: <b>{q.key}</b>
+    <main className="shop-home">
+      <div className="shop-wrap">
+        <p className="shop-kicker">Shop</p>
+        <h1>Shop</h1>
+        <p className="shop-sub">Sign in, add funds, and buy a key.</p>
+        <p className="shop-modules">
+          <a className="shop-btn" href="/playbook/">
+            Modules
+          </a>
         </p>
-      )}
 
-      {!userId ? (
-        <>
-          <p>Create an account or sign in.</p>
-          <SignInButton />
-          <span> </span>
-          <SignUpButton />
-        </>
-      ) : (
-        <>
-          <p>You are signed in.</p>
-          <p>Balance: ${(balanceCents / 100).toFixed(2)}</p>
-          <p>
-            <a href="/topup">Add funds with USDT</a>
+        {q.err === "balance" && <p className="shop-note">Not enough balance.</p>}
+        {q.err === "stock" && <p className="shop-note">Out of stock.</p>}
+        {q.err === "signin" && <p className="shop-note">Sign in first.</p>}
+        {q.key && (
+          <p className="shop-note">
+            Your key: <b>{q.key}</b>
           </p>
-          {isAdmin && (
+        )}
+
+        {!userId ? (
+          <div className="shop-account">
+            <p>Create an account or sign in.</p>
+            <SignInButton />
+            <span> </span>
+            <SignUpButton />
+          </div>
+        ) : (
+          <div className="shop-account">
+            <p>You are signed in.</p>
+            <p>Balance: ${(balanceCents / 100).toFixed(2)}</p>
             <p>
-              <a href="/admin/stock">Admin stock</a>
+              <a href="/topup">Add funds with USDT</a>
             </p>
-          )}
-          <p>
-            <a href="/orders">Your keys</a>
-          </p>
-          <UserButton />
-        </>
-      )}
+            {isAdmin && (
+              <p>
+                <a href="/admin/stock">Admin stock</a>
+              </p>
+            )}
+            <p>
+              <a href="/orders">Your keys</a>
+            </p>
+            <UserButton />
+          </div>
+        )}
 
-      <h2>Products</h2>
-      {products.length === 0 && <p>No products yet.</p>}
-      {products.map((product) => (
-        <div key={product.id} style={{ margin: "16px 0" }}>
-          <p>
-            <b>{product.name}</b> — $
-            {(product.priceCents / 100).toFixed(2)} — {product.stock.length} in
-            stock
-          </p>
-          {userId ? (
-            <form action={buyProduct}>
-              <input type="hidden" name="slug" value={product.slug} />
-              <button type="submit">Buy</button>
-            </form>
-          ) : (
-            <p>Sign in to buy.</p>
-          )}
+        <h2>Products</h2>
+        {products.length === 0 && <p className="shop-muted">No products yet.</p>}
+        <div className="shop-products">
+          {products.map((product) => (
+            <article key={product.id} className="shop-card">
+              <h3>{product.name}</h3>
+              <p className="shop-price">
+                ${(product.priceCents / 100).toFixed(2)}
+              </p>
+              <p className="shop-muted">{product.stock.length} in stock</p>
+              {userId ? (
+                <form action={buyProduct}>
+                  <input type="hidden" name="slug" value={product.slug} />
+                  <button className="shop-btn" type="submit">
+                    Buy
+                  </button>
+                </form>
+              ) : (
+                <p className="shop-signin">Sign in to buy.</p>
+              )}
+            </article>
+          ))}
         </div>
-      ))}
+      </div>
     </main>
   );
 }
