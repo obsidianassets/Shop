@@ -32,6 +32,17 @@ model TopUp {
   createdAt   DateTime @default(now())
 }
 
+model DepositInvoice {
+  id          String   @id @default(cuid())
+  userId      String
+  amountCents Int
+  exactUnits  String
+  status      String   @default("pending")
+  txHash      String?  @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
 model Product {
   id         String      @id @default(cuid())
   slug       String      @unique

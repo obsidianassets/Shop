@@ -1,6 +1,8 @@
 "use server";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { Prisma } from "@prisma/client";
+import { randomInt } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -54,6 +56,73 @@ export async function confirmTopUp(formData: FormData) {
   revalidatePath("/topup");
   revalidatePath("/");
   redirect("/topup?ok=confirmed");
+}
+
+export async function createDeposit(formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) redirect("/topup?err=signin");
+
+  const dollars = Number(formData.get("amount"));
+  if (!Number.isInteger(dollars) || dollars < 1 || dollars > 20_000_000) {
+    redirect("/topup?err=amount");
+  }
+
+  const user = await currentUser();
+  const email = user?.emailAddresses[0]?.emailAddress ?? "";
+  await prisma.user.upsert({
+    where: { id: userId },
+    update: { email: email || `${userId}@shop.local` },
+    create: { id: userId, email: email || `${userId}@shop.local` },
+  });
+
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+  let invoice: { id: string } | null = null;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      invoice = await prisma.$transaction(
+        async (tx) => {
+          for (let pick = 0; pick < 25; pick++) {
+            const tail = randomInt(1, 1_000_000);
+            const exactUnits = (BigInt(dollars) * 1_000_000n + BigInt(tail)).toString();
+            await tx.$executeRaw`SELECT pg_advisory_xact_lock((hashtext(${exactUnits}))::bigint)`;
+            const clash = await tx.depositInvoice.findFirst({
+              where: {
+                exactUnits,
+                status: "pending",
+                expiresAt: { gt: new Date() },
+              },
+              select: { id: true },
+            });
+            if (clash) continue;
+            const created = await tx.depositInvoice.create({
+              data: {
+                userId,
+                amountCents: dollars * 100,
+                exactUnits,
+                status: "pending",
+                expiresAt,
+              },
+            });
+            return tx.depositInvoice.findUnique({ where: { id: created.id } });
+          }
+          throw new Error("tail");
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+      break;
+    } catch (error) {
+      const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+      if (code === "P2034" && attempt < 4) continue;
+      console.error(error);
+      const message = error instanceof Error ? error.message : String(error);
+      redirect("/topup?err=invoice&message=" + encodeURIComponent(message));
+    }
+  }
+
+  if (!invoice) redirect("/topup?err=invoice");
+  revalidatePath("/topup");
+  redirect("/topup?invoice=" + invoice.id);
 }
 
 export async function createProduct(formData: FormData) {

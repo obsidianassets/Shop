@@ -998,3 +998,50 @@ body:has(.shop-home) {
 .shop-purchase-close:hover {
   filter: brightness(1.2);
 }
+
+.shop-deposit-open {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #212a3d;
+}
+
+.shop-deposit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 14px;
+}
+
+.shop-deposit-amount {
+  color: #f4f6fa;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.shop-deposit-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f6bff;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shop-deposit-note {
+  margin: 8px 0 0;
+  color: #8b93a8;
+  line-height: 1.5;
+}
+
+.shop-deposit-copy:hover {
+  filter: brightness(1.2);
+}

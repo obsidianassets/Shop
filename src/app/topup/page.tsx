@@ -1,45 +1,102 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { confirmTopUp, submitTopUp } from "../actions";
+import { confirmTopUp, createDeposit, submitTopUp } from "../actions";
+import { DepositInvoiceCard, DepositWatch } from "../deposit-panel";
 import ShopBar from "../shop-bar";
 import ShopRoomNav from "../shop-room-nav";
 
 export const dynamic = "force-dynamic";
 
-export default async function TopUpPage() {
+export default async function TopUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ err?: string; invoice?: string; message?: string }>;
+}) {
+  const q = await searchParams;
   const { userId } = await auth();
   const user = await currentUser();
   const email = user?.emailAddresses[0]?.emailAddress ?? "";
   const accountLabel = email || user?.username || "";
   const isAdmin = email === process.env.ADMIN_EMAIL;
+  const now = new Date();
 
-  const mine = userId
-    ? await prisma.topUp.findMany({
-        where: { userId },
-        orderBy: { createdAt: "desc" },
-      })
-    : [];
+  const [mine, pending, openInvoices, highlighted] = await Promise.all([
+    userId
+      ? prisma.topUp.findMany({
+          where: { userId },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
+    isAdmin
+      ? prisma.topUp.findMany({
+          where: { status: "pending" },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
+    userId
+      ? prisma.depositInvoice.findMany({
+          where: { userId, status: "pending", expiresAt: { gt: now } },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
+    userId && q.invoice
+      ? prisma.depositInvoice.findFirst({
+          where: { id: q.invoice, userId },
+        })
+      : Promise.resolve(null),
+  ]);
 
-  const pending = isAdmin
-    ? await prisma.topUp.findMany({
-        where: { status: "pending" },
-        orderBy: { createdAt: "desc" },
-      })
-    : [];
+  const wallet = process.env.USDT_TRC20_ADDRESS ?? "";
 
   return (
     <main className="shop-home">
       <ShopBar userId={userId} accountLabel={accountLabel} />
       <div className="shop-wrap shop-room">
         <ShopRoomNav />
-        <h1>Add funds — USDT TRC20</h1>
-        <p className="shop-sub">
-          Signed in as: {email || "not signed in"}
-        </p>
+        <h1>Add funds</h1>
+        <p className="shop-sub">USDT on TRC20</p>
+        {q.err === "signin" && <p className="shop-note">Sign in first.</p>}
+        {q.err === "amount" && (
+          <p className="shop-note">Enter a whole number of USDT, at least 1.</p>
+        )}
+        {q.err === "invoice" && <p className="shop-note">{q.message}</p>}
+        {highlighted?.status === "paid" && (
+          <p className="shop-note">
+            Deposit received. ${(highlighted.amountCents / 100).toFixed(2)} was added to your balance.
+          </p>
+        )}
+
+        <DepositWatch active={openInvoices.length > 0} />
 
         <section className="shop-panel">
+          <h2>Create deposit</h2>
+          <form action={createDeposit}>
+            <p>
+              <label className="shop-muted" htmlFor="deposit-amount">
+                Amount in USDT
+              </label>
+            </p>
+            <p>
+              <input id="deposit-amount" name="amount" type="number" min={1} step={1} required />
+            </p>
+            <button className="shop-primary" type="submit">
+              Create deposit
+            </button>
+          </form>
+          {openInvoices.map((invoice) => (
+            <DepositInvoiceCard
+              key={invoice.id}
+              address={wallet}
+              exactUnits={invoice.exactUnits}
+              expiresAt={invoice.expiresAt.toISOString()}
+            />
+          ))}
+        </section>
+
+        <section className="shop-panel">
+          <h2>Manual hash</h2>
           <p>Send USDT on the Tron / TRC20 network to:</p>
-          <p className="shop-hash">{process.env.USDT_TRC20_ADDRESS}</p>
+          <p className="shop-hash">{wallet}</p>
           <p className="shop-muted">Then paste the transaction hash.</p>
           <form action={submitTopUp}>
             <p>
