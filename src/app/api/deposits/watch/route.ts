@@ -30,8 +30,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  await prisma.depositInvoice.updateMany({
+    where: { status: "paid" },
+    data: { status: "complete" },
+  });
+  const failed = await prisma.depositInvoice.updateMany({
+    where: { status: "pending", expiresAt: { lte: new Date() } },
+    data: { status: "failed" },
+  });
   const credited = await matchDeposits();
-  if (credited > 0) {
+  if (credited > 0 || failed.count > 0) {
     revalidatePath("/topup");
     revalidatePath("/");
     revalidatePath("/account");
@@ -74,6 +82,7 @@ async function matchDeposits() {
     if (saved) {
       credited += 1;
       byUnits.delete(units);
+      revalidatePath(`/topup/invoice/${invoice.id}`);
     }
   }
   return credited;
@@ -105,7 +114,7 @@ async function creditInvoice(
           txHash: null,
           expiresAt: { gt: new Date() },
         },
-        data: { status: "paid", txHash },
+        data: { status: "complete", txHash },
       });
       if (updated.count !== 1) return false;
       await tx.ledger.create({

@@ -122,7 +122,7 @@ export async function createDeposit(formData: FormData) {
 
   if (!invoice) redirect("/topup?err=invoice");
   revalidatePath("/topup");
-  redirect("/topup?invoice=" + invoice.id);
+  redirect("/topup/invoice/" + invoice.id);
 }
 
 export async function createProduct(formData: FormData) {

@@ -1,7 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { confirmTopUp, createDeposit, submitTopUp } from "../actions";
-import { DepositInvoiceCard, DepositWatch } from "../deposit-panel";
 import ShopBar from "../shop-bar";
 import ShopRoomNav from "../shop-room-nav";
 
@@ -10,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function TopUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ err?: string; invoice?: string; message?: string }>;
+  searchParams: Promise<{ err?: string; message?: string }>;
 }) {
   const q = await searchParams;
   const { userId } = await auth();
@@ -20,7 +19,18 @@ export default async function TopUpPage({
   const isAdmin = email === process.env.ADMIN_EMAIL;
   const now = new Date();
 
-  const [mine, pending, openInvoices, highlighted] = await Promise.all([
+  if (userId) {
+    await prisma.depositInvoice.updateMany({
+      where: { userId, status: "paid" },
+      data: { status: "complete" },
+    });
+    await prisma.depositInvoice.updateMany({
+      where: { userId, status: "pending", expiresAt: { lte: now } },
+      data: { status: "failed" },
+    });
+  }
+
+  const [mine, pending, invoices] = await Promise.all([
     userId
       ? prisma.topUp.findMany({
           where: { userId },
@@ -35,15 +45,10 @@ export default async function TopUpPage({
       : Promise.resolve([]),
     userId
       ? prisma.depositInvoice.findMany({
-          where: { userId, status: "pending", expiresAt: { gt: now } },
+          where: { userId },
           orderBy: { createdAt: "desc" },
         })
       : Promise.resolve([]),
-    userId && q.invoice
-      ? prisma.depositInvoice.findFirst({
-          where: { id: q.invoice, userId },
-        })
-      : Promise.resolve(null),
   ]);
 
   const wallet = process.env.USDT_TRC20_ADDRESS ?? "";
@@ -60,13 +65,6 @@ export default async function TopUpPage({
           <p className="shop-note">Enter a whole number of USDT, at least 1.</p>
         )}
         {q.err === "invoice" && <p className="shop-note">{q.message}</p>}
-        {highlighted?.status === "paid" && (
-          <p className="shop-note">
-            Deposit received. ${(highlighted.amountCents / 100).toFixed(2)} was added to your balance.
-          </p>
-        )}
-
-        <DepositWatch active={openInvoices.length > 0} />
 
         <section className="shop-panel">
           <h2>Create deposit</h2>
@@ -83,14 +81,24 @@ export default async function TopUpPage({
               Create deposit
             </button>
           </form>
-          {openInvoices.map((invoice) => (
-            <DepositInvoiceCard
-              key={invoice.id}
-              address={wallet}
-              exactUnits={invoice.exactUnits}
-              expiresAt={invoice.expiresAt.toISOString()}
-            />
-          ))}
+          {userId && (
+            <>
+              <h2>Your invoices</h2>
+              {invoices.length === 0 ? (
+                <p className="shop-muted">No invoices yet.</p>
+              ) : (
+                <ul className="shop-lines">
+                  {invoices.map((invoice) => (
+                    <li key={invoice.id}>
+                      <span>${(invoice.amountCents / 100).toFixed(2)}</span>
+                      <span className="shop-muted">{invoice.status}</span>
+                      <a href={`/topup/invoice/${invoice.id}`}>View</a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </section>
 
         <section className="shop-panel">
