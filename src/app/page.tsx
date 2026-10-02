@@ -43,6 +43,10 @@ export default async function Home({
 
   return (
     <main className="shop-home">
+      <div className="shop-banner">
+        <img src="/shop-banner.png" alt="" />
+        <div className="shop-banner-fade" />
+      </div>
       <div className="shop-wrap">
         <p className="shop-kicker">Shop</p>
         <h1>Shop</h1>
