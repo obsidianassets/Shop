@@ -117,6 +117,110 @@ body:has(.shop-home) {
   font-size: 13px;
 }
 
+.shop-balance-menu {
+  position: relative;
+}
+
+.shop-balance-btn {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(91, 140, 255, 0.7);
+  border-radius: 8px;
+  background: transparent;
+  color: #f4f6fa;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.shop-balance-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  min-width: 200px;
+  padding: 12px;
+  border: 1px solid #212a3d;
+  border-radius: 12px;
+  background: #121826;
+}
+
+.shop-balance-panel::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 0;
+  left: 0;
+  height: 8px;
+}
+
+.shop-balance-panel p {
+  margin: 0 0 8px;
+  color: #f4f6fa;
+  font-size: 14px;
+}
+
+.shop-balance-panel a {
+  display: block;
+  color: #e3a94a;
+  text-decoration: none;
+}
+
+.shop-front a.shop-brand,
+.shop-front a.shop-topbar-email,
+.shop-front button.shop-topbar-login,
+.shop-front .shop-room-links a,
+.shop-front .shop-balance-panel a {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background-color: transparent;
+  transition: background-color 0.18s ease;
+}
+
+.shop-front a.shop-brand:hover,
+.shop-front a.shop-topbar-email:hover,
+.shop-front button.shop-topbar-login:hover,
+.shop-front .shop-room-links a:hover,
+.shop-front .shop-balance-panel a:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.shop-front .shop-hero-primary,
+.shop-front .shop-hero-modules,
+.shop-front .shop-btn,
+.shop-front .shop-discord,
+.shop-front .shop-topbar-start,
+.shop-front .shop-balance-btn {
+  transition:
+    background-color 0.18s ease,
+    filter 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.shop-front .shop-hero-primary:hover,
+.shop-front .shop-discord:hover,
+.shop-front .shop-topbar-start:hover,
+.shop-front .shop-balance-btn:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 18px rgba(47, 107, 255, 0.45);
+}
+
+.shop-front .shop-hero-modules:hover,
+.shop-front .shop-btn:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 18px rgba(227, 169, 74, 0.45);
+}
+
+.shop-front .shop-hero-secondary,
+.shop-front .shop-account button {
+  transition: filter 0.18s ease, background-color 0.18s ease;
+}
+
+.shop-front .shop-hero-secondary:hover,
+.shop-front .shop-account button:hover {
+  filter: brightness(1.12);
+}
+
 .shop-banner {
   position: relative;
   width: 100%;

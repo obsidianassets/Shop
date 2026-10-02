@@ -16,7 +16,6 @@ export default async function Home({
   const user = userId ? await currentUser() : null;
   const email = user?.emailAddresses[0]?.emailAddress ?? "";
   const accountLabel = email || user?.username || "";
-  const isAdmin = email === process.env.ADMIN_EMAIL;
   let balanceCents = 0;
 
   if (userId) {
@@ -53,8 +52,12 @@ export default async function Home({
   });
 
   return (
-    <main className="shop-home">
-      <ShopBar userId={userId} accountLabel={accountLabel} />
+    <main className="shop-home shop-front">
+      <ShopBar
+        userId={userId}
+        accountLabel={accountLabel}
+        balanceCents={userId ? balanceCents : undefined}
+      />
       <div className="shop-banner">
         <img src="/shop-banner.png" alt="" />
         <div className="shop-banner-fade" />
@@ -109,8 +112,6 @@ export default async function Home({
             </div>
           </div>
         </div>
-        <h1>Shop</h1>
-
         <div className="shop-strip">
           <div className="shop-strip-item">
             <div className="shop-strip-word">Premium</div>
@@ -155,31 +156,16 @@ export default async function Home({
           </p>
         )}
 
-        {!userId ? (
+        {!userId && (
           <div className="shop-account">
             <p>Create an account or sign in.</p>
             <SignInButton />
             <span> </span>
             <SignUpButton />
           </div>
-        ) : (
-          <div className="shop-account">
-            <p>Balance: ${(balanceCents / 100).toFixed(2)}</p>
-            <p>
-              <a href="/topup">Add funds with USDT</a>
-            </p>
-            {isAdmin && (
-              <p>
-                <a href="/admin/stock">Admin stock</a>
-              </p>
-            )}
-            <p>
-              <a href="/orders">Your keys</a>
-            </p>
-          </div>
         )}
 
-        <h2 id="products">Products</h2>
+        <h1>Shop</h1>
         {userId && (
           <p className="shop-room-links">
             <a href="/account">Account</a>
@@ -187,6 +173,7 @@ export default async function Home({
             <a href="/orders">Your orders</a>
           </p>
         )}
+        <h2 id="products">Products</h2>
         {products.length === 0 && <p className="shop-muted">No products yet.</p>}
         <div className="shop-products">
           {products.map((product) => (

@@ -1,11 +1,14 @@
 import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import BalanceMenu from "./balance-menu";
 
 export default function ShopBar({
   userId,
   accountLabel,
+  balanceCents,
 }: {
   userId: string | null;
   accountLabel: string;
+  balanceCents?: number;
 }) {
   return (
     <header className="shop-topbar">
@@ -15,6 +18,9 @@ export default function ShopBar({
         </a>
         {userId ? (
           <div className="shop-topbar-user">
+            {balanceCents !== undefined && (
+              <BalanceMenu balanceCents={balanceCents} />
+            )}
             <a className="shop-topbar-email" href="/account">
               {accountLabel}
             </a>
