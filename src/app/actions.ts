@@ -142,5 +142,5 @@ export async function buyProduct(formData: FormData) {
     }),
   ]);
 
-  redirect("/?key=" + item.payload);
+  redirect("/?delivered=" + encodeURIComponent(item.id));
 }

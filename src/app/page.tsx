@@ -2,6 +2,7 @@ import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { buyProduct } from "./actions";
+import PurchaseDialog from "./purchase-dialog";
 import ShopBar from "./shop-bar";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ key?: string; err?: string }>;
+  searchParams: Promise<{ delivered?: string; err?: string }>;
 }) {
   const q = await searchParams;
   const { userId } = await auth();
@@ -30,6 +31,15 @@ export default async function Home({
       _sum: { amountCents: true },
     });
     balanceCents = sum._sum.amountCents ?? 0;
+  }
+
+  let delivery: string | null = null;
+  if (userId && q.delivered) {
+    const sold = await prisma.stockItem.findFirst({
+      where: { id: q.delivered, soldTo: userId, status: "sold" },
+      select: { payload: true },
+    });
+    delivery = sold?.payload ?? null;
   }
 
   const marqueePills = [
@@ -150,11 +160,7 @@ export default async function Home({
         {q.err === "balance" && <p className="shop-note">Not enough balance.</p>}
         {q.err === "stock" && <p className="shop-note">Out of stock.</p>}
         {q.err === "signin" && <p className="shop-note">Sign in first.</p>}
-        {q.key && (
-          <p className="shop-note">
-            Your key: <b>{q.key}</b>
-          </p>
-        )}
+        {delivery !== null && <PurchaseDialog delivery={delivery} />}
 
         {!userId && (
           <div className="shop-account">
