@@ -8,10 +8,10 @@ import ShopRoomNav from "../../../shop-room-nav";
 
 export const dynamic = "force-dynamic";
 
-function exactAmount(exactUnits: string) {
+function exactAmount(exactUnits: string, scale: bigint) {
   const units = BigInt(exactUnits);
-  const whole = units / 1_000_000n;
-  const fraction = (units % 1_000_000n).toString().padStart(6, "0");
+  const whole = units / scale;
+  const fraction = (units % scale).toString().padStart(scale === 1_000_000_000n ? 9 : 6, "0");
   return `${whole}.${fraction}`;
 }
 
@@ -55,7 +55,10 @@ export default async function DepositInvoicePage({
     invoice = { ...invoice, status: "failed" };
   }
 
-  const wallet = process.env.USDT_TRC20_ADDRESS ?? "";
+  const sol = invoice?.currency === "sol";
+  const wallet = sol
+    ? (process.env.SOL_DEPOSIT_ADDRESS ?? "")
+    : (process.env.USDT_TRC20_ADDRESS ?? "");
   const qr = wallet
     ? await QRCode.toDataURL(wallet, {
         margin: 1,
@@ -63,7 +66,9 @@ export default async function DepositInvoicePage({
         color: { dark: "#0A0E17", light: "#F4F6FA" },
       })
     : "";
-  const exact = invoice ? exactAmount(invoice.exactUnits) : "";
+  const exact = invoice
+    ? exactAmount(invoice.exactUnits, sol ? 1_000_000_000n : 1_000_000n)
+    : "";
 
   return (
     <main className="shop-home">
@@ -85,15 +90,15 @@ export default async function DepositInvoicePage({
               <span className="shop-hash">{wallet}</span>
               <CopyButton value={wallet} />
             </div>
-            <p>Network: TRC20 (Tron)</p>
+            <p>Network: {sol ? "Solana" : "TRC20 (Tron)"}</p>
             <p className="shop-muted">Exact amount</p>
             <div className="shop-deposit-row">
-              <span className="shop-deposit-amount">{exact} USDT</span>
+              <span className="shop-deposit-amount">{exact} {sol ? "SOL" : "USDT"}</span>
               <CopyButton value={exact} />
             </div>
             <ul className="shop-deposit-notes">
               <li>Send the exact amount, including the decimals.</li>
-              <li>USDT on TRC20 only.</li>
+              <li>{sol ? "SOL on Solana only." : "USDT on TRC20 only."}</li>
               <li>A wrong network will not match.</li>
               <li>This invoice expires in 30 minutes.</li>
             </ul>

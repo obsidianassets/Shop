@@ -689,7 +689,8 @@ body:has(.shop-home) {
   margin: 0 0 12px;
 }
 
-.shop-panel input {
+.shop-panel input,
+.shop-panel select {
   width: min(100%, 420px);
   padding: 12px 14px;
   border: 1px solid #212a3d;

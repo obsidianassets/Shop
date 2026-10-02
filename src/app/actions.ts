@@ -62,9 +62,24 @@ export async function createDeposit(formData: FormData) {
   const { userId } = await auth();
   if (!userId) redirect("/topup?err=signin");
 
-  const dollars = Number(formData.get("amount"));
-  if (!Number.isInteger(dollars) || dollars < 1 || dollars > 20_000_000) {
-    redirect("/topup?err=amount");
+  const currency = String(formData.get("currency") || "usdt");
+  if (currency !== "usdt" && currency !== "sol") redirect("/topup?err=amount");
+
+  const rawAmount = String(formData.get("amount") || "").trim();
+  let amountCents = 0;
+  let baseUnits = 0n;
+  if (currency === "usdt") {
+    const dollars = Number(rawAmount);
+    if (!Number.isInteger(dollars) || dollars < 1 || dollars > 20_000_000) {
+      redirect("/topup?err=amount");
+    }
+    amountCents = dollars * 100;
+    baseUnits = BigInt(dollars) * 1_000_000n;
+  } else {
+    const parsed = parseSolAmount(rawAmount);
+    if (!parsed) redirect("/topup?err=sol");
+    amountCents = parsed.amountCents;
+    baseUnits = parsed.baseLamports;
   }
 
   const user = await currentUser();
@@ -83,12 +98,13 @@ export async function createDeposit(formData: FormData) {
       invoice = await prisma.$transaction(
         async (tx) => {
           for (let pick = 0; pick < 25; pick++) {
-            const tail = randomInt(1, 1_000_000);
-            const exactUnits = (BigInt(dollars) * 1_000_000n + BigInt(tail)).toString();
+            const tail = randomInt(1, currency === "sol" ? 10_000 : 1_000_000);
+            const exactUnits = (baseUnits + BigInt(tail)).toString();
             await tx.$executeRaw`SELECT pg_advisory_xact_lock((hashtext(${exactUnits}))::bigint)`;
             const clash = await tx.depositInvoice.findFirst({
               where: {
                 exactUnits,
+                currency,
                 status: "pending",
                 expiresAt: { gt: new Date() },
               },
@@ -98,8 +114,9 @@ export async function createDeposit(formData: FormData) {
             const created = await tx.depositInvoice.create({
               data: {
                 userId,
-                amountCents: dollars * 100,
+                amountCents,
                 exactUnits,
+                currency,
                 status: "pending",
                 expiresAt,
               },
@@ -123,6 +140,17 @@ export async function createDeposit(formData: FormData) {
   if (!invoice) redirect("/topup?err=invoice");
   revalidatePath("/topup");
   redirect("/topup/invoice/" + invoice.id);
+}
+
+function parseSolAmount(raw: string): { amountCents: number; baseLamports: bigint } | null {
+  if (!/^\d+(\.\d{1,2})?$/.test(raw)) return null;
+  const [whole, frac = ""] = raw.split(".");
+  const lamports = BigInt(whole) * 1_000_000_000n + BigInt((frac + "000000000").slice(0, 9));
+  const cents = Number(whole) * 100 + Number((frac + "00").slice(0, 2));
+  if (lamports <= 0n || !Number.isSafeInteger(cents) || cents < 1 || cents > 2_000_000_000) {
+    return null;
+  }
+  return { amountCents: cents, baseLamports: lamports };
 }
 
 export async function createProduct(formData: FormData) {

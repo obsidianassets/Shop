@@ -64,18 +64,32 @@ export default async function TopUpPage({
         {q.err === "amount" && (
           <p className="shop-note">Enter a whole number of USDT, at least 1.</p>
         )}
+        {q.err === "sol" && (
+          <p className="shop-note">Enter a SOL amount of at least 0.01.</p>
+        )}
         {q.err === "invoice" && <p className="shop-note">{q.message}</p>}
 
         <section className="shop-panel">
           <h2>Create deposit</h2>
           <form action={createDeposit}>
             <p>
-              <label className="shop-muted" htmlFor="deposit-amount">
-                Amount in USDT
+              <label className="shop-muted" htmlFor="deposit-currency">
+                Currency
               </label>
             </p>
             <p>
-              <input id="deposit-amount" name="amount" type="number" min={1} step={1} required />
+              <select id="deposit-currency" name="currency" defaultValue="usdt">
+                <option value="usdt">USDT</option>
+                <option value="sol">SOL</option>
+              </select>
+            </p>
+            <p>
+              <label className="shop-muted" htmlFor="deposit-amount">
+                Amount
+              </label>
+            </p>
+            <p>
+              <input id="deposit-amount" name="amount" type="number" min="0.01" step="any" required />
             </p>
             <button className="shop-primary" type="submit">
               Create deposit
@@ -91,6 +105,7 @@ export default async function TopUpPage({
                   {invoices.map((invoice) => (
                     <li key={invoice.id}>
                       <span>${(invoice.amountCents / 100).toFixed(2)}</span>
+                      <span className="shop-muted">{invoice.currency === "sol" ? "SOL" : "USDT"}</span>
                       <span className="shop-muted">{invoice.status}</span>
                       <a href={`/topup/invoice/${invoice.id}`}>View</a>
                     </li>

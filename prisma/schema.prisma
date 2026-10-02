@@ -37,6 +37,7 @@ model DepositInvoice {
   userId      String
   amountCents Int
   exactUnits  String
+  currency    String   @default("usdt")
   status      String   @default("pending")
   txHash      String?  @unique
   expiresAt   DateTime
