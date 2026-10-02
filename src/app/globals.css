@@ -68,7 +68,93 @@ body:has(.shop-home) {
 .shop-wrap {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 56px 28px 80px;
+  padding: 28px 28px 80px;
+}
+
+.shop-marquee {
+  margin-bottom: 28px;
+}
+
+.shop-marquee-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shop-marquee-blue {
+  color: #5b8cff;
+}
+
+.shop-marquee-gray {
+  color: #8b93a8;
+}
+
+.shop-marquee-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #8b93a8;
+}
+
+.shop-marquee-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.shop-marquee-viewport::before,
+.shop-marquee-viewport::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.shop-marquee-viewport::before {
+  left: 0;
+  background: linear-gradient(to right, #0a0e17, transparent);
+}
+
+.shop-marquee-viewport::after {
+  right: 0;
+  background: linear-gradient(to left, #0a0e17, transparent);
+}
+
+.shop-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: shop-marquee 28s linear infinite;
+}
+
+.shop-marquee-set {
+  display: flex;
+  gap: 12px;
+  padding-right: 12px;
+}
+
+.shop-pill {
+  border: 1px solid #33405c;
+  border-radius: 999px;
+  background: transparent;
+  color: #c5cdd8;
+  padding: 10px 18px;
+  white-space: nowrap;
+}
+
+@keyframes shop-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .shop-kicker {
@@ -161,7 +247,7 @@ body:has(.shop-home) {
 }
 
 .shop-clients {
-  margin-top: 56px;
+  margin-top: 28px;
   text-align: center;
 }
 
@@ -237,7 +323,7 @@ body:has(.shop-home) {
 }
 
 .shop-home h2 {
-  margin-top: 40px;
+  margin-top: 28px;
   font-size: 22px;
 }
 

@@ -31,6 +31,15 @@ export default async function Home({
     balanceCents = sum._sum.amountCents ?? 0;
   }
 
+  const marqueePills = [
+    "Meta Profiles",
+    "Meta Pages",
+    "Meta Business Managers",
+    "Individual Assets",
+    "Packaged Assets",
+    "Much more",
+  ];
+
   const products = await prisma.product.findMany({
     orderBy: { name: "asc" },
     include: {
@@ -48,6 +57,26 @@ export default async function Home({
         <div className="shop-banner-fade" />
       </div>
       <div className="shop-wrap">
+        <div className="shop-marquee">
+          <p className="shop-marquee-label">
+            <span className="shop-marquee-blue">Placeholder</span>
+            <span className="shop-marquee-dot" />
+            <span className="shop-marquee-gray">Placeholder</span>
+          </p>
+          <div className="shop-marquee-viewport">
+            <div className="shop-marquee-track">
+              {[0, 1].map((copy) => (
+                <div className="shop-marquee-set" key={copy}>
+                  {marqueePills.map((label) => (
+                    <span className="shop-pill" key={`${copy}-${label}`}>
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
         <p className="shop-kicker">Shop</p>
         <h1>Shop</h1>
         <p className="shop-sub">Sign in, add funds, and buy a key.</p>
