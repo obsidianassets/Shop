@@ -58,8 +58,17 @@ export default async function Home({
       </div>
       <section className="shop-hero">
         <div className="shop-hero-inner">
+          <p className="shop-hero-pill">
+            <span aria-hidden="true">✦</span>
+            Everything you need to scale, all in one place.
+          </p>
           <p className="shop-hero-title">
             Simple to buy. Fast to deliver. Built to scale.
+          </p>
+          <p className="shop-hero-copy">
+            Profiles, Business Managers, and Pages from one wallet, delivered
+            when payment clears. Delivery is immediate, and support is available
+            day and night.
           </p>
           <div className="shop-hero-actions">
             <a className="shop-hero-primary" href="#products">
