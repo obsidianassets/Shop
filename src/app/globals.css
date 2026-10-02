@@ -763,8 +763,139 @@ body:has(.shop-home) {
   color: #8b93a8;
 }
 
-.shop-card form {
+.shop-card form,
+.shop-buy {
   margin: 16px 0 0;
+}
+
+@keyframes shop-confirm-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.shop-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 11, 20, 0.72);
+  animation: shop-confirm-in 0.18s ease;
+}
+
+.shop-confirm-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 520px;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #212a3d;
+  border-radius: 16px;
+  background: #121826;
+  color: #f4f6fa;
+}
+
+.shop-confirm-card h2 {
+  margin: 0 0 16px;
+  color: #f4f6fa;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.shop-confirm-card p {
+  margin: 0 0 12px;
+  color: #f4f6fa;
+}
+
+.shop-confirm-qty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 16px;
+}
+
+.shop-confirm-qty button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #212a3d;
+  border-radius: 8px;
+  background: transparent;
+  color: #f4f6fa;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.shop-confirm-qty button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.shop-confirm-qty span {
+  min-width: 1.5em;
+  color: #f4f6fa;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.shop-confirm-total {
+  font-weight: 700;
+}
+
+.shop-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.shop-confirm-cancel,
+.shop-confirm-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.shop-confirm-cancel {
+  border: 1px solid #212a3d;
+  background: transparent;
+  color: #f4f6fa;
+}
+
+.shop-confirm-go {
+  border: 0;
+  background: #2f6bff;
+  color: #ffffff;
+}
+
+.shop-confirm-go:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.shop-confirm-cancel:hover,
+.shop-confirm-go:hover:not(:disabled),
+.shop-confirm-qty button:hover:not(:disabled) {
+  filter: brightness(1.2);
 }
 
 .shop-purchase {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function PurchaseDialog({ delivery }: { delivery: string }) {
+export default function PurchaseDialog({ deliveries }: { deliveries: string[] }) {
   const [open, setOpen] = useState(true);
   if (!open) return null;
 
@@ -12,8 +12,8 @@ export default function PurchaseDialog({ delivery }: { delivery: string }) {
   }
 
   function copy() {
-    const line = delivery.replace(/\r\n|\n|\r/g, " ");
-    void navigator.clipboard.writeText(line);
+    const text = deliveries.map((line) => line.replace(/\r\n|\n|\r/g, " ")).join("\n");
+    void navigator.clipboard.writeText(text);
   }
 
   return (
@@ -33,7 +33,7 @@ export default function PurchaseDialog({ delivery }: { delivery: string }) {
           ×
         </button>
         <h2 id="purchase-complete-title">Purchase complete</h2>
-        <textarea className="shop-purchase-key" readOnly value={delivery} />
+        <textarea className="shop-purchase-key" readOnly value={deliveries.join("\n")} />
         <div className="shop-purchase-actions">
           <button type="button" className="shop-purchase-btn" onClick={copy}>
             Copy

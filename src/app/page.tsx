@@ -1,7 +1,7 @@
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { buyProduct } from "./actions";
+import BuyConfirm from "./buy-confirm";
 import PurchaseDialog from "./purchase-dialog";
 import ShopBar from "./shop-bar";
 
@@ -33,13 +33,16 @@ export default async function Home({
     balanceCents = sum._sum.amountCents ?? 0;
   }
 
-  let delivery: string | null = null;
+  let deliveries: string[] | null = null;
   if (userId && q.delivered) {
-    const sold = await prisma.stockItem.findFirst({
-      where: { id: q.delivered, soldTo: userId, status: "sold" },
-      select: { payload: true },
+    const ids = q.delivered.split(",").filter(Boolean);
+    const sold = await prisma.stockItem.findMany({
+      where: { id: { in: ids }, soldTo: userId, status: "sold" },
+      select: { id: true, payload: true },
     });
-    delivery = sold?.payload ?? null;
+    const byId = new Map(sold.map((item) => [item.id, item.payload]));
+    const lines = ids.flatMap((id) => (byId.has(id) ? [byId.get(id) as string] : []));
+    if (lines.length > 0) deliveries = lines;
   }
 
   const marqueePills = [
@@ -160,7 +163,7 @@ export default async function Home({
         {q.err === "balance" && <p className="shop-note">Not enough balance.</p>}
         {q.err === "stock" && <p className="shop-note">Out of stock.</p>}
         {q.err === "signin" && <p className="shop-note">Sign in first.</p>}
-        {delivery !== null && <PurchaseDialog delivery={delivery} />}
+        {deliveries && <PurchaseDialog deliveries={deliveries} />}
 
         {!userId && (
           <div className="shop-account">
@@ -190,12 +193,13 @@ export default async function Home({
               </p>
               <p className="shop-muted">{product.stock.length} in stock</p>
               {userId ? (
-                <form action={buyProduct}>
-                  <input type="hidden" name="slug" value={product.slug} />
-                  <button className="shop-btn" type="submit">
-                    Buy
-                  </button>
-                </form>
+                <BuyConfirm
+                  name={product.name}
+                  slug={product.slug}
+                  priceCents={product.priceCents}
+                  balanceCents={balanceCents}
+                  stock={product.stock.length}
+                />
               ) : (
                 <p className="shop-signin">Sign in to buy.</p>
               )}

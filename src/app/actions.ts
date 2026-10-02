@@ -121,26 +121,52 @@ export async function buyProduct(formData: FormData) {
       })
     )._sum.amountCents ?? 0;
 
-  if (balance < product.priceCents) redirect("/?err=balance");
+  const quantity = Number(formData.get("quantity"));
+  if (!Number.isSafeInteger(quantity) || quantity < 1) redirect("/?err=stock");
 
-  const item = await prisma.stockItem.findFirst({
-    where: { productId: product.id, status: "available" },
-  });
-  if (!item) redirect("/?err=stock");
+  const totalCents = product.priceCents * quantity;
+  if (balance < totalCents) redirect("/?err=balance");
 
-  await prisma.$transaction([
-    prisma.stockItem.update({
-      where: { id: item.id },
-      data: { status: "sold", soldTo: userId },
-    }),
-    prisma.ledger.create({
-      data: {
-        userId,
-        amountCents: -product.priceCents,
-        reason: `buy:${product.slug}`,
-      },
-    }),
-  ]);
+  let bought: { error: "stock" | "balance" } | { ids: string[] };
+  try {
+    bought = await prisma.$transaction(async (tx) => {
+      const available = await tx.stockItem.findMany({
+        where: { productId: product.id, status: "available" },
+        orderBy: { id: "asc" },
+        take: quantity,
+      });
+      if (available.length < quantity) return { error: "stock" as const };
 
-  redirect("/?delivered=" + encodeURIComponent(item.id));
+      const fresh =
+        (
+          await tx.ledger.aggregate({
+            where: { userId },
+            _sum: { amountCents: true },
+          })
+        )._sum.amountCents ?? 0;
+      if (fresh < totalCents) return { error: "balance" as const };
+
+      const ids = available.map((item) => item.id);
+      const updated = await tx.stockItem.updateMany({
+        where: { id: { in: ids }, status: "available" },
+        data: { status: "sold", soldTo: userId },
+      });
+      if (updated.count !== quantity) throw new Error("stock");
+
+      await tx.ledger.create({
+        data: {
+          userId,
+          amountCents: -totalCents,
+          reason: `buy:${product.slug}`,
+        },
+      });
+      return { ids };
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "stock") redirect("/?err=stock");
+    throw error;
+  }
+
+  if ("error" in bought) redirect("/?err=" + bought.error);
+  redirect("/?delivered=" + encodeURIComponent(bought.ids.join(",")));
 }
