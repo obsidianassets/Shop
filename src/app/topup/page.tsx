@@ -65,7 +65,10 @@ export default async function TopUpPage({
           <p className="shop-note">Enter a whole number of USDT, at least 1.</p>
         )}
         {q.err === "sol" && (
-          <p className="shop-note">Enter a SOL amount of at least 0.01.</p>
+          <p className="shop-note">Enter a USD amount of at least 0.01.</p>
+        )}
+        {q.err === "price" && (
+          <p className="shop-note">The SOL price could not be loaded, so no invoice was created.</p>
         )}
         {q.err === "invoice" && <p className="shop-note">{q.message}</p>}
 
@@ -85,7 +88,7 @@ export default async function TopUpPage({
             </p>
             <p>
               <label className="shop-muted" htmlFor="deposit-amount">
-                Amount
+                Amount in USD
               </label>
             </p>
             <p>

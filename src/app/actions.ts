@@ -76,10 +76,14 @@ export async function createDeposit(formData: FormData) {
     amountCents = dollars * 100;
     baseUnits = BigInt(dollars) * 1_000_000n;
   } else {
-    const parsed = parseSolAmount(rawAmount);
-    if (!parsed) redirect("/topup?err=sol");
-    amountCents = parsed.amountCents;
-    baseUnits = parsed.baseLamports;
+    const cents = parseUsdCents(rawAmount);
+    if (cents === null) redirect("/topup?err=sol");
+    const price = await solPriceUsd();
+    if (price === null) redirect("/topup?err=price");
+    const micro = Math.floor((cents / 100 / price) * 1_000_000);
+    if (!Number.isFinite(micro) || micro < 0) redirect("/topup?err=price");
+    amountCents = cents;
+    baseUnits = BigInt(micro) * 1000n;
   }
 
   const user = await currentUser();
@@ -99,7 +103,10 @@ export async function createDeposit(formData: FormData) {
         async (tx) => {
           for (let pick = 0; pick < 25; pick++) {
             const tail = randomInt(1, currency === "sol" ? 10_000 : 1_000_000);
-            const exactUnits = (baseUnits + BigInt(tail)).toString();
+            const exactUnits =
+              currency === "sol"
+                ? (baseUnits + BigInt(tail) * 1000n).toString()
+                : (baseUnits + BigInt(tail)).toString();
             await tx.$executeRaw`SELECT pg_advisory_xact_lock((hashtext(${exactUnits}))::bigint)`;
             const clash = await tx.depositInvoice.findFirst({
               where: {
@@ -142,15 +149,28 @@ export async function createDeposit(formData: FormData) {
   redirect("/topup/invoice/" + invoice.id);
 }
 
-function parseSolAmount(raw: string): { amountCents: number; baseLamports: bigint } | null {
+function parseUsdCents(raw: string): number | null {
   if (!/^\d+(\.\d{1,2})?$/.test(raw)) return null;
   const [whole, frac = ""] = raw.split(".");
-  const lamports = BigInt(whole) * 1_000_000_000n + BigInt((frac + "000000000").slice(0, 9));
   const cents = Number(whole) * 100 + Number((frac + "00").slice(0, 2));
-  if (lamports <= 0n || !Number.isSafeInteger(cents) || cents < 1 || cents > 2_000_000_000) {
+  if (!Number.isSafeInteger(cents) || cents < 1 || cents > 2_000_000_000) return null;
+  return cents;
+}
+
+async function solPriceUsd(): Promise<number | null> {
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd",
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    const body = (await response.json()) as { solana?: { usd?: unknown } };
+    const price = body.solana?.usd;
+    if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) return null;
+    return price;
+  } catch {
     return null;
   }
-  return { amountCents: cents, baseLamports: lamports };
 }
 
 export async function createProduct(formData: FormData) {

@@ -8,10 +8,17 @@ import ShopRoomNav from "../../../shop-room-nav";
 
 export const dynamic = "force-dynamic";
 
-function exactAmount(exactUnits: string, scale: bigint) {
+function exactAmount(exactUnits: string) {
   const units = BigInt(exactUnits);
-  const whole = units / scale;
-  const fraction = (units % scale).toString().padStart(scale === 1_000_000_000n ? 9 : 6, "0");
+  const whole = units / 1_000_000n;
+  const fraction = (units % 1_000_000n).toString().padStart(6, "0");
+  return `${whole}.${fraction}`;
+}
+
+function exactSol(exactUnits: string) {
+  const micro = BigInt(exactUnits) / 1000n;
+  const whole = micro / 1_000_000n;
+  const fraction = (micro % 1_000_000n).toString().padStart(6, "0");
   return `${whole}.${fraction}`;
 }
 
@@ -66,9 +73,7 @@ export default async function DepositInvoicePage({
         color: { dark: "#0A0E17", light: "#F4F6FA" },
       })
     : "";
-  const exact = invoice
-    ? exactAmount(invoice.exactUnits, sol ? 1_000_000_000n : 1_000_000n)
-    : "";
+  const exact = invoice ? (sol ? exactSol(invoice.exactUnits) : exactAmount(invoice.exactUnits)) : "";
 
   return (
     <main className="shop-home">
@@ -91,11 +96,25 @@ export default async function DepositInvoicePage({
               <CopyButton value={wallet} />
             </div>
             <p>Network: {sol ? "Solana" : "TRC20 (Tron)"}</p>
-            <p className="shop-muted">Exact amount</p>
-            <div className="shop-deposit-row">
-              <span className="shop-deposit-amount">{exact} {sol ? "SOL" : "USDT"}</span>
-              <CopyButton value={exact} />
-            </div>
+            {sol ? (
+              <>
+                <p>You receive: ${(invoice.amountCents / 100).toFixed(2)}</p>
+                <p className="shop-muted">Send exactly</p>
+                <div className="shop-deposit-row">
+                  <span className="shop-deposit-amount">{exact}</span>
+                  <span>SOL</span>
+                  <CopyButton value={exact} />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="shop-muted">Exact amount</p>
+                <div className="shop-deposit-row">
+                  <span className="shop-deposit-amount">{exact} USDT</span>
+                  <CopyButton value={exact} />
+                </div>
+              </>
+            )}
             <ul className="shop-deposit-notes">
               <li>Send the exact amount, including the decimals.</li>
               <li>{sol ? "SOL on Solana only." : "USDT on TRC20 only."}</li>
