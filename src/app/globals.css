@@ -44,9 +44,83 @@ body:has(.shop-home) {
   font-family: "Inter", sans-serif;
 }
 
+.shop-topbar {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+  width: min(1100px, calc(100% - 32px));
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(10, 14, 23, 0.45);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.shop-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.shop-home a.shop-brand {
+  color: #f4f6fa;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.shop-topbar-auth,
+.shop-topbar-user {
+  display: flex;
+  align-items: center;
+}
+
+.shop-topbar-auth {
+  gap: 12px;
+}
+
+.shop-topbar-user {
+  gap: 10px;
+}
+
+.shop-topbar-login {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f4f6fa;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.shop-topbar-start {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #2f6bff;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shop-topbar-email {
+  color: #f4f6fa;
+  font-size: 13px;
+}
+
 .shop-banner {
   position: relative;
   width: 100%;
+  margin: 0;
   aspect-ratio: 3 / 1;
   max-height: 260px;
   overflow: hidden;

@@ -14,6 +14,7 @@ export default async function Home({
   const { userId } = await auth();
   const user = userId ? await currentUser() : null;
   const email = user?.emailAddresses[0]?.emailAddress ?? "";
+  const accountLabel = email || user?.username || "";
   const isAdmin = email === process.env.ADMIN_EMAIL;
   let balanceCents = 0;
 
@@ -52,6 +53,32 @@ export default async function Home({
 
   return (
     <main className="shop-home">
+      <header className="shop-topbar">
+        <div className="shop-topbar-inner">
+          <a className="shop-brand" href="/">
+            Obsidian Assets
+          </a>
+          {userId ? (
+            <div className="shop-topbar-user">
+              <span className="shop-topbar-email">{accountLabel}</span>
+              <UserButton />
+            </div>
+          ) : (
+            <div className="shop-topbar-auth">
+              <SignInButton>
+                <button type="button" className="shop-topbar-login">
+                  Log in
+                </button>
+              </SignInButton>
+              <SignUpButton>
+                <button type="button" className="shop-topbar-start">
+                  Get started
+                </button>
+              </SignUpButton>
+            </div>
+          )}
+        </div>
+      </header>
       <div className="shop-banner">
         <img src="/shop-banner.png" alt="" />
         <div className="shop-banner-fade" />
@@ -74,11 +101,13 @@ export default async function Home({
             <a className="shop-hero-primary" href="#products">
               Browse the shop
             </a>
-            <SignUpButton>
-              <button type="button" className="shop-hero-secondary">
-                Create account
-              </button>
-            </SignUpButton>
+            {!userId && (
+              <SignUpButton>
+                <button type="button" className="shop-hero-secondary">
+                  Create account
+                </button>
+              </SignUpButton>
+            )}
           </div>
         </div>
       </section>
@@ -165,7 +194,6 @@ export default async function Home({
           </div>
         ) : (
           <div className="shop-account">
-            <p>You are signed in.</p>
             <p>Balance: ${(balanceCents / 100).toFixed(2)}</p>
             <p>
               <a href="/topup">Add funds with USDT</a>
@@ -178,7 +206,6 @@ export default async function Home({
             <p>
               <a href="/orders">Your keys</a>
             </p>
-            <UserButton />
           </div>
         )}
 
