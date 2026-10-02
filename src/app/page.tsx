@@ -65,6 +65,25 @@ export default async function Home({
           </a>
         </p>
 
+        <div className="shop-strip">
+          <div className="shop-strip-item">
+            <div className="shop-strip-word">Premium</div>
+            <div className="shop-strip-line">Assets, ready for you</div>
+          </div>
+          <div className="shop-strip-item">
+            <div className="shop-strip-word">Clear</div>
+            <div className="shop-strip-line">Guided, module by module</div>
+          </div>
+          <div className="shop-strip-item">
+            <div className="shop-strip-word">Yours</div>
+            <div className="shop-strip-line">Every order, kept safe</div>
+          </div>
+          <div className="shop-strip-item">
+            <div className="shop-strip-word">Here</div>
+            <div className="shop-strip-line">Real support on Discord</div>
+          </div>
+        </div>
+
         {q.err === "balance" && <p className="shop-note">Not enough balance.</p>}
         {q.err === "stock" && <p className="shop-note">Out of stock.</p>}
         {q.err === "signin" && <p className="shop-note">Sign in first.</p>}

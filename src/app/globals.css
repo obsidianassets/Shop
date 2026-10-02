@@ -105,6 +105,59 @@ body:has(.shop-home) {
 
 .shop-modules {
   margin: 28px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.shop-strip {
+  display: flex;
+  margin-top: 28px;
+  background: #121826;
+  border: 1px solid #2a3348;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.shop-strip-item {
+  flex: 1;
+  padding: 28px 16px;
+  border-left: 1px solid #2a3348;
+  text-align: center;
+}
+
+.shop-strip-item:first-child {
+  border-left: 0;
+}
+
+.shop-strip-word {
+  font-size: 28px;
+  font-weight: 700;
+  color: #5b8cff;
+  text-shadow: 0 0 18px rgba(91, 140, 255, 0.45);
+}
+
+.shop-strip-line {
+  margin-top: 6px;
+  color: #9aa3b5;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 699px) {
+  .shop-strip {
+    flex-direction: column;
+  }
+
+  .shop-strip-item {
+    border-top: 1px solid #2a3348;
+    border-left: 0;
+  }
+
+  .shop-strip-item:first-child {
+    border-top: 0;
+  }
 }
 
 .shop-btn {
