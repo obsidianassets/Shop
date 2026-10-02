@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
   const roles: string[] = Array.isArray(member.roles) ? member.roles : [];
   if (!roles.some((id) => safeEqual(id, roleId))) return fail("missing_client_role");
 
-  const maxAgeMs = 12 * 60 * 60 * 1000;
+  const maxAgeMs = 60 * 60 * 1000;
   const token = sign({
     sub: user.id,
     username: user.username,
@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
     secure: true,
     sameSite: "lax",
     path: "/",
+    maxAge: 60 * 60,
   });
   return response;
 }
