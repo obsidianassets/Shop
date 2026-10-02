@@ -55,14 +55,6 @@ export default async function Home({
           <a className="shop-btn" href="/playbook/">
             Modules
           </a>
-          <a
-            className="shop-btn"
-            href="https://discord.gg/RwWRrpu3Z"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Discord
-          </a>
         </p>
 
         <div className="shop-strip">
@@ -83,6 +75,22 @@ export default async function Home({
             <div className="shop-strip-line">Real support on Discord</div>
           </div>
         </div>
+
+        <section className="shop-clients">
+          <p className="shop-clients-label">Trusted</p>
+          <h2>Used by thousands</h2>
+          <p className="shop-clients-copy">
+            A name clients already know. Join Discord and see why people stay.
+          </p>
+          <a
+            className="shop-discord"
+            href="https://discord.gg/RwWRrpu3Z"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Join the Discord
+          </a>
+        </section>
 
         {q.err === "balance" && <p className="shop-note">Not enough balance.</p>}
         {q.err === "stock" && <p className="shop-note">Out of stock.</p>}
