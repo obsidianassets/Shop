@@ -490,6 +490,122 @@ body:has(.shop-home) {
   color: #8b93a8;
 }
 
+.shop-home a.shop-topbar-email {
+  color: #f4f6fa;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.shop-room {
+  padding-top: 88px;
+}
+
+.shop-room-nav,
+.shop-room-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+}
+
+.shop-room-links {
+  margin-top: 12px;
+}
+
+.shop-home .shop-room-nav a,
+.shop-home .shop-room-links a {
+  color: #e3a94a;
+  text-decoration: none;
+}
+
+.shop-balance {
+  margin: 12px 0 0;
+  color: #f4f6fa;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.shop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.shop-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f6bff;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.shop-home a.shop-primary {
+  color: #ffffff;
+}
+
+.shop-panel {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid #212a3d;
+  border-radius: 12px;
+  background: #121826;
+}
+
+.shop-panel h2 {
+  margin-top: 0;
+}
+
+.shop-panel p {
+  margin: 0 0 12px;
+}
+
+.shop-panel input {
+  width: min(100%, 420px);
+  padding: 12px 14px;
+  border: 1px solid #212a3d;
+  border-radius: 8px;
+  background: #0a0e17;
+  color: #f4f6fa;
+}
+
+.shop-lines {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.shop-lines li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-top: 1px solid #212a3d;
+  color: #f4f6fa;
+}
+
+.shop-lines li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.shop-hash {
+  color: #8b93a8;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
 .shop-home h2 {
   margin-top: 28px;
   font-size: 22px;

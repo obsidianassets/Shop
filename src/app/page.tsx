@@ -1,7 +1,8 @@
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { buyProduct } from "./actions";
+import ShopBar from "./shop-bar";
 
 export const dynamic = "force-dynamic";
 
@@ -53,32 +54,7 @@ export default async function Home({
 
   return (
     <main className="shop-home">
-      <header className="shop-topbar">
-        <div className="shop-topbar-inner">
-          <a className="shop-brand" href="/">
-            Obsidian Assets
-          </a>
-          {userId ? (
-            <div className="shop-topbar-user">
-              <span className="shop-topbar-email">{accountLabel}</span>
-              <UserButton />
-            </div>
-          ) : (
-            <div className="shop-topbar-auth">
-              <SignInButton>
-                <button type="button" className="shop-topbar-login">
-                  Log in
-                </button>
-              </SignInButton>
-              <SignUpButton>
-                <button type="button" className="shop-topbar-start">
-                  Get started
-                </button>
-              </SignUpButton>
-            </div>
-          )}
-        </div>
-      </header>
+      <ShopBar userId={userId} accountLabel={accountLabel} />
       <div className="shop-banner">
         <img src="/shop-banner.png" alt="" />
         <div className="shop-banner-fade" />
@@ -210,6 +186,13 @@ export default async function Home({
         )}
 
         <h2 id="products">Products</h2>
+        {userId && (
+          <p className="shop-room-links">
+            <a href="/account">Account</a>
+            <a href="/topup">Add funds</a>
+            <a href="/orders">Your orders</a>
+          </p>
+        )}
         {products.length === 0 && <p className="shop-muted">No products yet.</p>}
         <div className="shop-products">
           {products.map((product) => (
