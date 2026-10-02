@@ -2,7 +2,7 @@
   const errors = {
     not_in_server: "You need to join the Discord server before continuing.",
     missing_role: "Your Discord account does not have the Client role.",
-    missing_client_role: "Your Discord account does not have the Client role.",
+    missing_client_role: "You do not have the Client role. If you have spent at least €50 on the Discord server or on this website, create a ticket and tell staff so they can give you the role.",
     cancelled: "Discord login was cancelled. Please try again.",
     discord_denied: "Discord login was cancelled. Please try again.",
     login_failed: "Discord login could not be completed. Please try again.",
